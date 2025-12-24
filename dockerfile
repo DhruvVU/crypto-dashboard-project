@@ -1,5 +1,5 @@
 # 1. Download version of linux with python already installed
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 # 2. Folder created inside container
 WORKDIR /app
@@ -10,9 +10,10 @@ COPY requirements.txt .
 # 4. Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt 
 
+# Grant permission to run the script
+RUN chmod +x entrypoint.sh
 
-# 5. Copy rest of code
-COPY . .
+EXPOSE 8501
 
 # 6. Run the bot
-CMD ["python", "-u","main.py"]
+CMD ["./entrypoint.sh"]
