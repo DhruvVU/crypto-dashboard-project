@@ -6,8 +6,16 @@ def fetch_prices():
         'ids': COINS,
         'vs_currencies': CURRENCY
     }
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
     try:
-        response = requests.get(API_URL, params=params, timeout=10)
+        response = requests.get(API_URL, params=params, headers=headers, timeout=10)
+
+        if response.status_code == 429:
+            print("⚠️ Rate Limit Hit (429). Skipping this check.")
+            return None
+        
         response.raise_for_status()
         data = response.json()
         
