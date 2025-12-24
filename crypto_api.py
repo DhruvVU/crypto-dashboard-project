@@ -1,29 +1,35 @@
 import requests
-from config import API_URL, COINS, CURRENCY
+import config
 
 def fetch_prices():
-    params = {
-        'ids': COINS,
-        'vs_currencies': CURRENCY
-    }
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-    }
-    try:
-        response = requests.get(API_URL, params=params, headers=headers, timeout=10)
+    currency = config.CURRENCY.upper()
+    btc_url = f"https://api.coinbase.com/v2/prices/BTC-{currency}/spot"
+    eth_url = f"https://api.coinbase.com/v2/prices/ETH-{currency}/spot"
 
-        if response.status_code == 429:
-            print("⚠️ Rate Limit Hit (429). Skipping this check.")
+    try:
+        prices = {}
+
+        # Fetch bitcoin
+        response_btc = requests.get(btc_url)
+        if response_btc.status_code == 200:
+            data = response_btc.json()
+            prices['bitcoin'] = float(data['data']['amount'])
+        else:
+            print(f"⚠️ Failed to fetch BTC: {response_btc.status_code}")
+
+        # Fetch ethereum
+        response_eth = requests.get(eth_url)
+        if response_eth.status_code == 200:
+            data = response_eth.json()
+            prices['ethereum'] = float(data['data']['amount'])
+        else:
+            print(f"⚠️ Failed to fetch ETH: {response_eth.status_code}")
+
+        if prices:
+            return prices
+        else:
             return None
-        
-        response.raise_for_status()
-        data = response.json()
-        
-        # Simplify the data structure
-        return {
-            'bitcoin': data['bitcoin'][CURRENCY],
-            'ethereum': data['ethereum'][CURRENCY]
-        }
+
     except Exception as e:
         print(f"API Error: {e}")
         return None 
